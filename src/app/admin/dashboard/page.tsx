@@ -1,4 +1,5 @@
 'use client'
+
 import { useEffect, useState } from 'react'
 import { useAreas } from '@/hooks/useAreas'
 import { useAllUpdates } from '@/hooks/useUpdates'
@@ -15,25 +16,38 @@ export default function AdminDashboardPage() {
   const [totalDoadores, setTotalDoadores] = useState<number | null>(null)
 
   useEffect(() => {
-    supabase
-      .from('profiles')
-      .select('id', { count: 'exact', head: true })
-      .eq('tipo', 'doador')
-      .then(({ count }) => setTotalDoadores(count ?? 0))
-      .catch(() => setTotalDoadores(0))
+    const fetchDoadores = async () => {
+      const { count, error } = await supabase
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .eq('tipo', 'doador')
+
+      if (error) {
+        setTotalDoadores(0)
+      } else {
+        setTotalDoadores(count ?? 0)
+      }
+    }
+
+    fetchDoadores()
   }, [])
 
   const totalArvores = updates.reduce((s, u) => s + (u.arvores ?? 0), 0)
 
   const statusColor: Record<string, string> = {
-    ativo: 'green', em_andamento: 'green', concluido: 'gray', pausado: 'amber',
+    ativo: 'green',
+    em_andamento: 'green',
+    concluido: 'gray',
+    pausado: 'amber',
   }
 
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-manrope font-bold text-3xl text-primary mb-1">Dashboard</h2>
+          <h2 className="font-manrope font-bold text-3xl text-primary mb-1">
+            Dashboard
+          </h2>
           <p className="font-inter text-on-surface-variant text-sm">
             Visão geral — Iracambi Raiz Verde
           </p>
@@ -50,17 +64,49 @@ export default function AdminDashboardPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { icon: TreePine, label: 'Árvores Plantadas', value: totalArvores > 0 ? totalArvores.toLocaleString('pt-BR') : '0' },
-          { icon: TreePine, label: 'Áreas Cadastradas', value: loadingAreas ? '...' : String(areas.length) },
-          { icon: TreePine, label: 'Áreas Ativas',      value: loadingAreas ? '...' : String(areas.filter((a) => a.status === 'ativo' || a.status === 'em_andamento').length) },
-          { icon: Users,    label: 'Doadores',          value: totalDoadores === null ? '...' : String(totalDoadores) },
+          {
+            icon: TreePine,
+            label: 'Árvores Plantadas',
+            value:
+              totalArvores > 0
+                ? totalArvores.toLocaleString('pt-BR')
+                : '0',
+          },
+          {
+            icon: TreePine,
+            label: 'Áreas Cadastradas',
+            value: loadingAreas ? '...' : String(areas.length),
+          },
+          {
+            icon: TreePine,
+            label: 'Áreas Ativas',
+            value: loadingAreas
+              ? '...'
+              : String(
+                  areas.filter(
+                    (a) =>
+                      a.status === 'ativo' ||
+                      a.status === 'em_andamento'
+                  ).length
+                ),
+          },
+          {
+            icon: Users,
+            label: 'Doadores',
+            value:
+              totalDoadores === null ? '...' : String(totalDoadores),
+          },
         ].map(({ icon: Icon, label, value }) => (
           <Card key={label}>
             <div className="w-9 h-9 rounded-xl bg-secondary-container flex items-center justify-center mb-3">
               <Icon className="w-5 h-5 text-secondary" />
             </div>
-            <p className="font-manrope font-bold text-2xl text-primary leading-none mb-1">{value}</p>
-            <p className="text-xs font-inter text-on-surface-variant">{label}</p>
+            <p className="font-manrope font-bold text-2xl text-primary leading-none mb-1">
+              {value}
+            </p>
+            <p className="text-xs font-inter text-on-surface-variant">
+              {label}
+            </p>
           </Card>
         ))}
       </div>
@@ -69,21 +115,38 @@ export default function AdminDashboardPage() {
         {/* Projetos */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-manrope font-semibold text-primary">Projetos</h3>
-            <Link href="/admin/areas" className="text-xs font-inter text-secondary hover:text-primary flex items-center gap-1">
+            <h3 className="font-manrope font-semibold text-primary">
+              Projetos
+            </h3>
+            <Link
+              href="/admin/areas"
+              className="text-xs font-inter text-secondary hover:text-primary flex items-center gap-1"
+            >
               Gerenciar <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-          {loadingAreas ? <Spinner /> : (
+          {loadingAreas ? (
+            <Spinner />
+          ) : (
             <ul className="space-y-3">
               {areas.slice(0, 6).map((area) => (
-                <li key={area.id} className="flex items-center justify-between">
-                  <span className="text-sm font-inter text-on-surface truncate mr-2">{area.nome}</span>
-                  <Badge label={area.status} color={statusColor[area.status] ?? 'gray'} />
+                <li
+                  key={area.id}
+                  className="flex items-center justify-between"
+                >
+                  <span className="text-sm font-inter text-on-surface truncate mr-2">
+                    {area.nome}
+                  </span>
+                  <Badge
+                    label={area.status}
+                    color={statusColor[area.status] ?? 'gray'}
+                  />
                 </li>
               ))}
               {areas.length === 0 && (
-                <p className="text-sm font-inter text-on-surface-variant py-2">Nenhum projeto cadastrado.</p>
+                <p className="text-sm font-inter text-on-surface-variant py-2">
+                  Nenhum projeto cadastrado.
+                </p>
               )}
             </ul>
           )}
@@ -92,30 +155,50 @@ export default function AdminDashboardPage() {
         {/* Atualizações recentes */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-manrope font-semibold text-primary">Atualizações Recentes</h3>
-            <Link href="/admin/update" className="text-xs font-inter text-secondary hover:text-primary flex items-center gap-1">
+            <h3 className="font-manrope font-semibold text-primary">
+              Atualizações Recentes
+            </h3>
+            <Link
+              href="/admin/update"
+              className="text-xs font-inter text-secondary hover:text-primary flex items-center gap-1"
+            >
               Adicionar <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-          {loadingUpdates ? <Spinner /> : (
+          {loadingUpdates ? (
+            <Spinner />
+          ) : (
             <ul className="space-y-3">
               {updates.slice(0, 5).map((u) => (
-                <li key={u.id} className="flex items-center justify-between">
+                <li
+                  key={u.id}
+                  className="flex items-center justify-between"
+                >
                   <div>
                     <p className="text-sm font-inter text-on-surface">
-                      {u.arvores ? `${u.arvores} árvores` : u.status ?? 'Atualização'}
+                      {u.arvores
+                        ? `${u.arvores} árvores`
+                        : u.status ?? 'Atualização'}
                     </p>
                     <p className="text-xs font-inter text-on-surface-variant">
                       {u.data
-                        ? format(new Date(u.data), 'dd/MM/yyyy', { locale: ptBR })
-                        : format(new Date(u.created_at), 'dd/MM/yyyy', { locale: ptBR })}
+                        ? format(new Date(u.data), 'dd/MM/yyyy', {
+                            locale: ptBR,
+                          })
+                        : format(
+                            new Date(u.created_at),
+                            'dd/MM/yyyy',
+                            { locale: ptBR }
+                          )}
                     </p>
                   </div>
                   <Badge label={u.status ?? 'ok'} color="green" />
                 </li>
               ))}
               {updates.length === 0 && (
-                <p className="text-sm font-inter text-on-surface-variant py-2">Nenhuma atualização.</p>
+                <p className="text-sm font-inter text-on-surface-variant py-2">
+                  Nenhuma atualização.
+                </p>
               )}
             </ul>
           )}
@@ -124,18 +207,34 @@ export default function AdminDashboardPage() {
 
       {/* Atalhos rápidos */}
       <div>
-        <h3 className="font-manrope font-semibold text-primary mb-4">Ações Rápidas</h3>
+        <h3 className="font-manrope font-semibold text-primary mb-4">
+          Ações Rápidas
+        </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { href: '/admin/areas',    icon: TreePine,    label: 'Novo Projeto' },
-            { href: '/admin/update',   icon: Plus,        label: 'Nova Atualização' },
-            { href: '/admin/usuarios', icon: Users,       label: 'Ver Usuários' },
-            { href: '/admin/doacoes',  icon: DollarSign,  label: 'Ver Doações' },
+            { href: '/admin/areas', icon: TreePine, label: 'Novo Projeto' },
+            {
+              href: '/admin/update',
+              icon: Plus,
+              label: 'Nova Atualização',
+            },
+            {
+              href: '/admin/usuarios',
+              icon: Users,
+              label: 'Ver Usuários',
+            },
+            {
+              href: '/admin/doacoes',
+              icon: DollarSign,
+              label: 'Ver Doações',
+            },
           ].map(({ href, icon: Icon, label }) => (
             <Link key={href} href={href}>
               <Card className="flex flex-col items-center gap-2 py-5 hover:border-secondary hover:shadow-forest cursor-pointer transition-all group">
                 <Icon className="w-6 h-6 text-secondary group-hover:scale-110 transition-transform" />
-                <span className="text-sm font-inter font-semibold text-on-surface group-hover:text-primary transition-colors">{label}</span>
+                <span className="text-sm font-inter font-semibold text-on-surface group-hover:text-primary transition-colors">
+                  {label}
+                </span>
               </Card>
             </Link>
           ))}
