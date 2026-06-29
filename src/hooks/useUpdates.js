@@ -1,4 +1,5 @@
 'use client'
+
 import { useEffect, useState } from 'react'
 import { getUpdatesByArea, getAllUpdates } from '@/services/updatesService'
 
@@ -9,6 +10,7 @@ export function useUpdatesByArea(areaId) {
 
   useEffect(() => {
     if (!areaId) return
+
     getUpdatesByArea(areaId)
       .then(setUpdates)
       .catch((e) => setError(e.message))
