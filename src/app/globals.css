@@ -1,0 +1,98 @@
+/* Fontes: Fraunces (display orgânica/editorial), Manrope (UI), Inter (texto) */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-fraunces: 'Fraunces', Georgia, serif;
+  --font-manrope: 'Manrope', system-ui, sans-serif;
+  --font-inter: 'Inter', system-ui, sans-serif;
+}
+
+@layer base {
+  html { scroll-behavior: smooth; }
+
+  body { @apply bg-background text-on-background font-inter antialiased; }
+
+  /* Foco visível e consistente */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid theme('colors.secondary');
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #e2efe5; }
+  ::-webkit-scrollbar-thumb { background: #9fc2aa; border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2f8f58; }
+
+  ::selection { background: #cbeed6; color: #08291b; }
+}
+
+@layer components {
+  .container-page { @apply max-w-6xl mx-auto px-6; }
+
+  /* Skeleton com brilho */
+  .skeleton { @apply relative overflow-hidden bg-surface-container rounded-xl; }
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent);
+    transform: translateX(-100%);
+    animation: shimmer 1.4s infinite;
+  }
+
+  /* ── ASSINATURA: curvas de nível (topografia do terreno) ──────────── */
+  .pattern-topo {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg fill='none' stroke='%2308291b' stroke-opacity='0.05' stroke-width='1.2'%3E%3Cpath d='M0 24 Q40 6 80 24 T160 24'/%3E%3Cpath d='M0 56 Q40 38 80 56 T160 56'/%3E%3Cpath d='M0 88 Q40 70 80 88 T160 88'/%3E%3Cpath d='M0 120 Q40 102 80 120 T160 120'/%3E%3Cpath d='M0 152 Q40 134 80 152 T160 152'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 160px 160px;
+  }
+  /* Variante clara para usar sobre fundos escuros */
+  .pattern-topo-light {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.06' stroke-width='1.2'%3E%3Cpath d='M0 24 Q40 6 80 24 T160 24'/%3E%3Cpath d='M0 56 Q40 38 80 56 T160 56'/%3E%3Cpath d='M0 88 Q40 70 80 88 T160 88'/%3E%3Cpath d='M0 120 Q40 102 80 120 T160 120'/%3E%3Cpath d='M0 152 Q40 134 80 152 T160 152'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 160px 160px;
+  }
+
+  /* Grão sutil para dar textura natural (papel/terra) */
+  .bg-grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+
+  /* Pílula/eyebrow característico com folha */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-xs font-inter font-semibold uppercase tracking-[0.18em] text-secondary;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 22px; height: 1.5px;
+    @apply bg-secondary inline-block rounded-full;
+  }
+}
+
+@layer utilities {
+  .text-gradient-green {
+    background: linear-gradient(120deg, #08291b, #2f8f58 70%, #8ccb4e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .shadow-forest    { box-shadow: 0 4px 24px rgba(8, 41, 27, 0.10); }
+  .shadow-forest-lg { box-shadow: 0 14px 50px rgba(8, 41, 27, 0.16); }
+  .border-forest    { border: 1px solid rgba(8, 41, 27, 0.12); }
+
+  .reveal-1 { animation-delay: .05s; }
+  .reveal-2 { animation-delay: .12s; }
+  .reveal-3 { animation-delay: .19s; }
+  .reveal-4 { animation-delay: .26s; }
+}
