@@ -4,7 +4,11 @@ import { Card } from '@/components/ui'
 import { User, Mail, Shield } from 'lucide-react'
 
 export default function PerfilPage() {
-  const { session, profile } = useAuth()
+  // Forçamos o TypeScript a entender que session tem a estrutura esperada
+  const { session, profile } = useAuth() as { 
+    session: { user?: { email?: string | null } } | null; 
+    profile: any; 
+  }
 
   return (
     <div className="space-y-8">
