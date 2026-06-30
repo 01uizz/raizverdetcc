@@ -14,7 +14,10 @@ interface Update {
 }
 
 export function RecentUpdates({ updates: propUpdates }: { updates: any[] }) {
-  const { session } = useAuth();
+  // Aplicada a tipagem na desestruturação do hook para corrigir o erro 'unknown'
+  const { session } = useAuth() as {
+    session: { user?: { id?: string; email?: string | null } } | null;
+  };
   const [donations, setDonations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

@@ -67,7 +67,7 @@ export default function PainelPage() {
       </div>
 
       {/* Stat cards */}
-      <DashboardStatCards stats={impactStats} loading={loadingStats} />
+      <DashboardStatCards stats={stats} loading={loadingStats} />
 
       {/* Carrossel */}
       <DashboardCarousel />
