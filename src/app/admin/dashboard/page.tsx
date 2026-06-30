@@ -8,7 +8,13 @@ import { Card, Badge, Spinner } from '@/components/ui'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { TreePine, Users, Plus, DollarSign, ArrowRight } from 'lucide-react'
+import {
+  TreePine,
+  Users,
+  Plus,
+  DollarSign,
+  ArrowRight,
+} from 'lucide-react'
 
 export default function AdminDashboardPage() {
   const { areas, loading: loadingAreas } = useAreas()
@@ -17,22 +23,30 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     const fetchDoadores = async () => {
-      const { count, error } = await supabase
-        .from('profiles')
-        .select('id', { count: 'exact', head: true })
-        .eq('tipo', 'doador')
+      try {
+        const { count, error } = await supabase
+          .from('profiles')
+          .select('id', { count: 'exact', head: true })
+          .eq('tipo', 'doador')
 
-      if (error) {
-        setTotalDoadores(0)
-      } else {
+        if (error) {
+          setTotalDoadores(0)
+          return
+        }
+
         setTotalDoadores(count ?? 0)
+      } catch {
+        setTotalDoadores(0)
       }
     }
 
     fetchDoadores()
   }, [])
 
-  const totalArvores = updates.reduce((s, u) => s + (u.arvores ?? 0), 0)
+  const totalArvores = updates.reduce(
+    (s, u) => s + (u.arvores ?? 0),
+    0
+  )
 
   const statusColor: Record<string, string> = {
     ativo: 'green',
@@ -52,6 +66,7 @@ export default function AdminDashboardPage() {
             Visão geral — Iracambi Raiz Verde
           </p>
         </div>
+
         <Link
           href="/admin/update"
           className="flex items-center gap-2 bg-primary text-white font-inter font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-primary/90 transition-colors"
@@ -94,7 +109,9 @@ export default function AdminDashboardPage() {
             icon: Users,
             label: 'Doadores',
             value:
-              totalDoadores === null ? '...' : String(totalDoadores),
+              totalDoadores === null
+                ? '...'
+                : String(totalDoadores),
           },
         ].map(({ icon: Icon, label, value }) => (
           <Card key={label}>
@@ -125,6 +142,7 @@ export default function AdminDashboardPage() {
               Gerenciar <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
+
           {loadingAreas ? (
             <Spinner />
           ) : (
@@ -143,6 +161,7 @@ export default function AdminDashboardPage() {
                   />
                 </li>
               ))}
+
               {areas.length === 0 && (
                 <p className="text-sm font-inter text-on-surface-variant py-2">
                   Nenhum projeto cadastrado.
@@ -165,6 +184,7 @@ export default function AdminDashboardPage() {
               Adicionar <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
+
           {loadingUpdates ? (
             <Spinner />
           ) : (
@@ -195,6 +215,7 @@ export default function AdminDashboardPage() {
                   <Badge label={u.status ?? 'ok'} color="green" />
                 </li>
               ))}
+
               {updates.length === 0 && (
                 <p className="text-sm font-inter text-on-surface-variant py-2">
                   Nenhuma atualização.
@@ -205,11 +226,12 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
 
-      {/* Atalhos rápidos */}
+      {/* Ações rápidas */}
       <div>
         <h3 className="font-manrope font-semibold text-primary mb-4">
           Ações Rápidas
         </h3>
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { href: '/admin/areas', icon: TreePine, label: 'Novo Projeto' },
