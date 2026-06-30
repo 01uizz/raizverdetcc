@@ -61,7 +61,7 @@ export function FooterSection() {
 
         <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
           <p className="text-xs font-inter text-white/45">© {new Date().getFullYear()} Iracambi Raiz Verde. Todos os direitos reservados.</p>
-          <Link href="/admin" className="inline-flex items-center gap-1.5 text-xs font-inter text-white/45 hover:text-white/80 border border-white/15 hover:border-white/30 rounded-full px-3 py-1.5 transition-all">
+          <Link href="/admin/login" className="inline-flex items-center gap-1.5 text-xs font-inter text-white/45 hover:text-white/80 border border-white/15 hover:border-white/30 rounded-full px-3 py-1.5 transition-all">
             <Lock className="w-3 h-3" /> Área administrativa
           </Link>
         </div>

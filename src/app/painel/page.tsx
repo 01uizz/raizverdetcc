@@ -22,6 +22,18 @@ export default function PainelPage() {
 
   const firstName = profile?.nome?.split(' ')[0] ?? 'Doador'
 
+  // Adapta o formato vindo de useStats (totalArrecadado, totalArvores, ...)
+  // para o esperado por DashboardStatCards (total_donated, total_trees, ...).
+  // CO2_POR_ARVORE_T: estimativa média de CO₂ (toneladas) sequestrado por muda.
+  // É um valor de referência — a ONG pode ajustá-lo conforme sua metodologia.
+  const CO2_POR_ARVORE_T = 0.0218
+  const impactStats = {
+    total_donated: stats.totalArrecadado,
+    total_trees: stats.totalArvores,
+    total_co2: Math.round(stats.totalArvores * CO2_POR_ARVORE_T * 100) / 100,
+    total_area: stats.totalHectares,
+  }
+
   const handleOpenPix = useCallback(() => setShowPix(true), [])
   const handleClosePix = useCallback(() => setShowPix(false), [])
 
@@ -36,7 +48,7 @@ export default function PainelPage() {
       )}
 
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="font-manrope font-bold text-3xl text-primary mb-1">
             Olá, {firstName} 👋
@@ -55,21 +67,21 @@ export default function PainelPage() {
       </div>
 
       {/* Stat cards */}
-      <DashboardStatCards stats={stats} loading={loadingStats} />
+      <DashboardStatCards stats={impactStats} loading={loadingStats} />
 
       {/* Carrossel */}
       <DashboardCarousel />
 
       {/* Grid: atualizações + projetos */}
-      <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-7">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-7">
           <h3 className="font-manrope font-semibold text-xl text-primary mb-4">
             Últimas Atualizações
           </h3>
           <RecentUpdates updates={updates.slice(0, 5)} />
         </div>
 
-        <div className="col-span-5">
+        <div className="lg:col-span-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-manrope font-semibold text-xl text-primary">
               Projetos Ativos

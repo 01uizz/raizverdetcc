@@ -35,8 +35,8 @@ export default function MapaPage() {
       {loading ? (
         <Spinner />
       ) : (
-        <div className="grid grid-cols-12 gap-6">
-          <div className="col-span-4 space-y-3 max-h-[640px] overflow-y-auto pr-1">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-4 space-y-3 lg:max-h-[640px] lg:overflow-y-auto pr-1">
             {areas.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-sm font-inter text-on-surface-variant">
@@ -55,7 +55,7 @@ export default function MapaPage() {
             )}
           </div>
 
-          <div className="col-span-8">
+          <div className="lg:col-span-8">
             <MapView
               areas={areas}
               selectedAreaId={selectedArea?.id}

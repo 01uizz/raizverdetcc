@@ -31,8 +31,8 @@ export function RecentUpdates({ updates: propUpdates }: { updates: any[] }) {
       }
 
       const { data } = await supabase
-        .from("donations")
-        .select("*")
+        .from("doacoes")
+        .select("id, valor, status, created_at")
         .eq("user_id", session.user.id)
         .order("created_at", { ascending: false })
         .limit(10);
@@ -118,8 +118,8 @@ export function RecentUpdates({ updates: propUpdates }: { updates: any[] }) {
                 Você fez uma doação!
               </p>
               <p className="font-inter text-xs text-on-surface-variant mt-0.5">
-                R$ {donation.amount?.toFixed(2).replace(".", ",")} →{" "}
-                {donation.trees} mudas plantadas
+                R$ {(Number(donation.valor ?? donation.amount) || 0).toFixed(2).replace(".", ",")}
+                {donation.status ? ` · ${donation.status}` : ""}
               </p>
               <p className="font-inter text-xs text-on-surface-variant/60 mt-1 flex items-center gap-1">
                 <Calendar className="w-3 h-3" />

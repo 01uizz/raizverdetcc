@@ -1,5 +1,6 @@
 'use client'
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
+import type { Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 
 interface Profile {
@@ -11,7 +12,7 @@ interface Profile {
 }
 
 interface AuthValue {
-  session: unknown
+  session: Session | null
   profile: Profile | null
   loading: boolean
   isAdmin: boolean
@@ -44,9 +45,12 @@ async function fetchProfile(userId: string): Promise<Profile | null> {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<any>(null)
+  const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  // Guarda o id do usuário cujo perfil já está carregado, para evitar
+  // recarregar o perfil em eventos que não mudam o usuário (ex.: TOKEN_REFRESHED).
+  const loadedUserId = useRef<string | null>(null)
 
   useEffect(() => {
     let mounted = true
@@ -56,6 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const s = data.session
       setSession(s)
       if (s?.user) {
+        loadedUserId.current = s.user.id
         const p = await fetchProfile(s.user.id)
         if (mounted) setProfile(p)
       }
@@ -66,9 +71,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!mounted) return
       setSession(s)
       if (s?.user) {
-        const p = await fetchProfile(s.user.id)
-        if (mounted) setProfile(p)
+        // Só busca o perfil de novo se o usuário realmente mudou.
+        if (loadedUserId.current !== s.user.id) {
+          loadedUserId.current = s.user.id
+          const p = await fetchProfile(s.user.id)
+          if (mounted) setProfile(p)
+        }
       } else {
+        loadedUserId.current = null
         setProfile(null)
       }
       if (mounted) setLoading(false)

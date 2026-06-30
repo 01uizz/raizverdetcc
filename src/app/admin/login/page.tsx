@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { signIn } from '@/services/authService'
+import { signIn, signOut } from '@/services/authService'
+import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { Loader2, Mail, Lock, Shield } from 'lucide-react'
@@ -25,12 +26,41 @@ export default function AdminLoginPage() {
     setLoading(true)
     setError(null)
     try {
-      await signIn(email, password)
-      // middleware vai verificar se é admin e redirecionar
+      // 1) Autentica
+      const { user } = await signIn(email, password)
+      if (!user) {
+        setError('Não foi possível iniciar a sessão. Tente novamente.')
+        return
+      }
+
+      // 2) Verifica a permissão na hora (sem depender de re-render reativo).
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('tipo')
+        .eq('id', user.id)
+        .single()
+
+      if (profileError) {
+        // Não foi possível confirmar a permissão (ex.: rede/RLS). Não derruba a sessão.
+        setError('Não foi possível verificar suas permissões. Tente novamente.')
+        return
+      }
+
+      if (profile?.tipo === 'admin') {
+        // 3a) É admin: entra no painel. O refresh sincroniza o middleware/cookies.
+        router.replace('/admin/dashboard')
+        router.refresh()
+      } else {
+        // 3b) Conta válida, mas sem permissão de administrador.
+        await signOut()
+        setError('Esta conta não tem permissão de administrador.')
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Erro'
       if (msg.includes('Invalid login credentials')) {
         setError('Credenciais inválidas.')
+      } else if (msg.includes('Email not confirmed')) {
+        setError('Confirme seu e-mail antes de entrar.')
       } else {
         setError(msg)
       }

@@ -15,7 +15,12 @@ interface Props {
 }
 
 export function DashboardStatCards({ stats, loading }: Props) {
-  const hasImpact = stats.total_trees > 0 || stats.total_donated > 0;
+  // Normaliza para evitar erros caso algum campo venha indefinido.
+  const totalDonated = Number(stats?.total_donated) || 0;
+  const totalTrees = Number(stats?.total_trees) || 0;
+  const totalCo2 = Number(stats?.total_co2) || 0;
+  const totalArea = Number(stats?.total_area) || 0;
+  const hasImpact = totalTrees > 0 || totalDonated > 0;
 
   if (loading) {
     return (
@@ -66,7 +71,7 @@ export function DashboardStatCards({ stats, loading }: Props) {
           <span className="text-2xl">💰</span>
         </div>
         <p className="font-manrope font-bold text-2xl text-primary">
-          R$ {stats.total_donated.toFixed(2).replace(".", ",")}
+          R$ {totalDonated.toFixed(2).replace(".", ",")}
         </p>
         <p className="text-xs font-inter text-on-surface-variant mt-1">
           total doado
@@ -81,7 +86,7 @@ export function DashboardStatCards({ stats, loading }: Props) {
           <Trees className="w-5 h-5 text-green-600" />
         </div>
         <p className="font-manrope font-bold text-2xl text-primary">
-          {stats.total_trees}
+          {totalTrees}
         </p>
         <p className="text-xs font-inter text-on-surface-variant mt-1">
           mudas plantadas
@@ -96,7 +101,7 @@ export function DashboardStatCards({ stats, loading }: Props) {
           <Factory className="w-5 h-5 text-blue-600" />
         </div>
         <p className="font-manrope font-bold text-2xl text-primary">
-          {stats.total_co2.toFixed(2)}
+          {totalCo2.toFixed(2)}
         </p>
         <p className="text-xs font-inter text-on-surface-variant mt-1">
           toneladas compensadas
@@ -111,7 +116,7 @@ export function DashboardStatCards({ stats, loading }: Props) {
           <MapPin className="w-5 h-5 text-orange-600" />
         </div>
         <p className="font-manrope font-bold text-2xl text-primary">
-          {stats.total_area.toFixed(3)}
+          {totalArea.toFixed(2)}
         </p>
         <p className="text-xs font-inter text-on-surface-variant mt-1">
           hectares recuperados
