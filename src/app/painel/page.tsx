@@ -55,7 +55,15 @@ export default function PainelPage() {
       </div>
 
       {/* Stat cards */}
-      <DashboardStatCards stats={stats} loading={loadingStats} />
+      <DashboardStatCards
+        stats={{
+          total_donated: stats.totalArrecadado,
+          total_trees: stats.totalArvores,
+          total_co2: 0,
+          total_area: stats.totalHectares,
+        }}
+        loading={loadingStats}
+      />
 
       {/* Carrossel */}
       <DashboardCarousel />
