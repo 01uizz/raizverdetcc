@@ -66,11 +66,7 @@ export default function PainelPage() {
         </button>
       </div>
 
-<<<<<<< HEAD
-      {/* Stat cards - CORRIGIDO: Passando impactStats em vez de stats */}
-=======
       {/* Stat cards */}
->>>>>>> c86158a (feat: ajusta colunas e regras do supabase)
       <DashboardStatCards stats={impactStats} loading={loadingStats} />
 
       {/* Carrossel */}
