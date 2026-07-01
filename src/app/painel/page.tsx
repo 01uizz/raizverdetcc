@@ -22,7 +22,7 @@ export default function PainelPage() {
 
   const firstName = profile?.nome?.split(' ')[0] ?? 'Doador'
 
-  // Adapta o formato vindo de useStats (totalArrecadado, totalArvores, ...)
+  // Adapta o formato vinda de useStats (totalArrecadado, totalArvores, ...)
   // para o esperado por DashboardStatCards (total_donated, total_trees, ...).
   // CO2_POR_ARVORE_T: estimativa média de CO₂ (toneladas) sequestrado por muda.
   // É um valor de referência — a ONG pode ajustá-lo conforme sua metodologia.
