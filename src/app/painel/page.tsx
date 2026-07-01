@@ -28,10 +28,10 @@ export default function PainelPage() {
   // É um valor de referência — a ONG pode ajustá-lo conforme sua metodologia.
   const CO2_POR_ARVORE_T = 0.0218
   const impactStats = {
-    total_donated: stats?.totalArrecadado ?? 0,
-    total_trees: stats?.totalArvores ?? 0,
-    total_co2: Math.round((stats?.totalArvores ?? 0) * CO2_POR_ARVORE_T * 100) / 100,
-    total_area: stats?.totalHectares ?? 0,
+    total_donated: stats.totalArrecadado,
+    total_trees: stats.totalArvores,
+    total_co2: Math.round(stats.totalArvores * CO2_POR_ARVORE_T * 100) / 100,
+    total_area: stats.totalHectares,
   }
 
   const handleOpenPix = useCallback(() => setShowPix(true), [])
@@ -66,7 +66,11 @@ export default function PainelPage() {
         </button>
       </div>
 
+<<<<<<< HEAD
       {/* Stat cards - CORRIGIDO: Passando impactStats em vez de stats */}
+=======
+      {/* Stat cards */}
+>>>>>>> c86158a (feat: ajusta colunas e regras do supabase)
       <DashboardStatCards stats={impactStats} loading={loadingStats} />
 
       {/* Carrossel */}

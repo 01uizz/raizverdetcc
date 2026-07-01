@@ -1,8 +1,7 @@
 'use client'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useAreas } from '@/hooks/useAreas'
-import { Badge, Spinner, EmptyState, ErrorState } from '@/components/ui'
+import { Badge, Spinner, EmptyState, ErrorState, CoverImage } from '@/components/ui'
 import { ArrowRight, TreePine, Target } from 'lucide-react'
 
 const statusColor: Record<string, string> = { ativo: 'green', em_andamento: 'green', concluido: 'gray', pausado: 'amber' }
@@ -43,12 +42,11 @@ export function ProjectsSection() {
               <Link key={area.id} href={`/areas/${area.id}`} className="block group animate-fade-up" style={{ animationDelay: `${i * 0.08}s` }}>
                 <div className="bg-white border border-outline-variant rounded-2xl overflow-hidden hover:shadow-forest-lg transition-all duration-300 hover:-translate-y-1 h-full">
                   <div className="relative overflow-hidden" style={{ height: 176 }}>
-                    <Image
-                      src={area.capa_url || fallbackImages[i % fallbackImages.length]}
+                    <CoverImage
+                      src={area.capa_url}
+                      fallbackSrc={fallbackImages[i % fallbackImages.length]}
                       alt={area.nome}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 384px"
-                      className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                      imgClassName="group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent" />
                     <div className="absolute top-3 left-3">

@@ -1,9 +1,10 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useAreas } from '@/hooks/useAreas'
 import { createArea, updateArea, deleteArea } from '@/services/areasService'
+import { uploadPhoto } from '@/services/storageService'
 import { Card, Badge, Button, Spinner, EmptyState, ErrorState } from '@/components/ui'
-import { Pencil, Trash2, Check, X, Trees } from 'lucide-react'
+import { Pencil, Trash2, Check, X, Trees, Upload, ImageIcon } from 'lucide-react'
 
 const STATUS_OPTIONS = ['ativo', 'em_andamento', 'concluido', 'pausado'] as const
 const STATUS_LABEL: Record<string, string> = { ativo: 'Ativo', em_andamento: 'Em andamento', concluido: 'Concluído', pausado: 'Pausado' }
@@ -37,6 +38,34 @@ export default function AdminAreasPage() {
   const [editForm, setEditForm] = useState<AreaForm>(EMPTY)
   const [formError, setFormError] = useState<string | null>(null)
 
+  // Upload de capa — cadastro
+  const [file, setFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+  // Upload de capa — edição
+  const [editFile, setEditFile] = useState<File | null>(null)
+  const [editPreview, setEditPreview] = useState<string | null>(null)
+  const editFileRef = useRef<HTMLInputElement>(null)
+
+  function pickCreateFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0]
+    if (!f) return
+    setFile(f)
+    setPreview(URL.createObjectURL(f))
+  }
+  function pickEditFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0]
+    if (!f) return
+    setEditFile(f)
+    setEditPreview(URL.createObjectURL(f))
+  }
+  function resetCreateImage() {
+    setFile(null)
+    setPreview(null)
+    setForm((s) => ({ ...s, capa_url: '' }))
+    if (fileRef.current) fileRef.current.value = ''
+  }
+
   const set = (k: keyof AreaForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm((s) => ({ ...s, [k]: e.target.value }))
   const setEdit = (k: keyof AreaForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
@@ -46,8 +75,15 @@ export default function AdminAreasPage() {
     e.preventDefault()
     setSaving(true); setFormError(null)
     try {
-      await createArea(toPayload(form))
+      const payload = toPayload(form)
+      // Se o admin escolheu um arquivo, faz upload e usa a URL gerada (host do
+      // Supabase, já liberado). Sobrepõe o campo de URL, se ambos preenchidos.
+      if (file) {
+        payload.capa_url = await uploadPhoto(file, 'capas')
+      }
+      await createArea(payload)
       setForm(EMPTY); setShowForm(false)
+      resetCreateImage()
       await refetch()
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : 'Erro ao salvar')
@@ -56,6 +92,9 @@ export default function AdminAreasPage() {
 
   function startEdit(area: any) {
     setEditingId(area.id)
+    setEditFile(null)
+    setEditPreview(null)
+    if (editFileRef.current) editFileRef.current.value = ''
     setEditForm({
       nome: area.nome ?? '', descricao: area.descricao ?? '', objetivo: area.objetivo ?? '',
       tamanho: area.tamanho ? String(area.tamanho) : '', meta_arvores: area.meta_arvores ? String(area.meta_arvores) : '',
@@ -66,8 +105,13 @@ export default function AdminAreasPage() {
   async function handleSaveEdit(id: string) {
     setSaving(true); setFormError(null)
     try {
-      await updateArea(id, toPayload(editForm))
+      const payload = toPayload(editForm)
+      if (editFile) {
+        payload.capa_url = await uploadPhoto(editFile, id)
+      }
+      await updateArea(id, payload)
       setEditingId(null)
+      setEditFile(null); setEditPreview(null)
       await refetch()
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : 'Erro ao salvar')
@@ -112,7 +156,41 @@ export default function AdminAreasPage() {
               <Label>Objetivo (transparência)</Label>
               <textarea value={form.objetivo} onChange={set('objetivo')} rows={2} className={inputCls} placeholder="O que este projeto pretende alcançar…" />
             </div>
-            <FieldText label="URL da imagem de capa (opcional)" value={form.capa_url} onChange={set('capa_url')} placeholder="https://… (do Storage do Supabase)" />
+            <div>
+              <Label>Imagem de capa (opcional)</Label>
+              <div className="flex flex-col sm:flex-row gap-4 items-start">
+                <div className="relative w-full sm:w-48 h-32 rounded-xl overflow-hidden border border-outline-variant bg-surface-container-low shrink-0">
+                  {preview || form.capa_url ? (
+                    <img src={preview || form.capa_url} alt="Prévia da capa" className="w-full h-full object-cover object-center" />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-on-surface-variant gap-1">
+                      <ImageIcon className="w-6 h-6" />
+                      <span className="text-[11px] font-inter">Sem imagem</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 w-full space-y-2">
+                  <div className="flex gap-2">
+                    <button type="button" onClick={() => fileRef.current?.click()}
+                      className="inline-flex items-center gap-2 bg-secondary-container text-secondary text-sm font-inter font-semibold px-4 py-2 rounded-xl hover:bg-secondary hover:text-white transition-colors">
+                      <Upload className="w-4 h-4" /> Enviar imagem
+                    </button>
+                    {(preview || form.capa_url) && (
+                      <button type="button" onClick={resetCreateImage}
+                        className="inline-flex items-center gap-1.5 text-sm font-inter text-on-surface-variant px-3 py-2 rounded-xl hover:bg-surface-container transition-colors">
+                        <X className="w-4 h-4" /> Remover
+                      </button>
+                    )}
+                  </div>
+                  <input ref={fileRef} type="file" accept="image/*" onChange={pickCreateFile} className="hidden" />
+                  <input value={form.capa_url} onChange={(e) => { setForm((s) => ({ ...s, capa_url: e.target.value })); setFile(null); setPreview(null) }}
+                    placeholder="ou cole uma URL de imagem…" className={inputCls} />
+                  <p className="text-[11px] font-inter text-on-surface-variant">
+                    A imagem é enquadrada automaticamente (sem bordas). Formatos: JPG, PNG ou WEBP.
+                  </p>
+                </div>
+              </div>
+            </div>
             {formError && <p className="text-xs font-inter text-error bg-error-container px-3 py-2 rounded-lg">{formError}</p>}
             <Button type="submit" disabled={saving}>{saving ? 'Salvando…' : 'Cadastrar Projeto'}</Button>
           </form>
@@ -132,7 +210,25 @@ export default function AdminAreasPage() {
                   </select>
                   <input type="number" value={editForm.tamanho} onChange={setEdit('tamanho')} placeholder="Tamanho (ha)" className={inlineCls} />
                   <input type="number" value={editForm.meta_arvores} onChange={setEdit('meta_arvores')} placeholder="Meta de mudas" className={inlineCls} />
-                  <input value={editForm.capa_url} onChange={setEdit('capa_url')} placeholder="URL da capa" className={`${inlineCls} md:col-span-2`} />
+                  <div className="md:col-span-3 flex flex-col sm:flex-row gap-2 sm:items-center">
+                    <div className="relative w-16 h-12 rounded-lg overflow-hidden border border-outline-variant bg-surface-container-low shrink-0">
+                      {editPreview || editForm.capa_url ? (
+                        <img src={editPreview || editForm.capa_url} alt="Capa" className="w-full h-full object-cover object-center" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
+                          <ImageIcon className="w-4 h-4" />
+                        </div>
+                      )}
+                    </div>
+                    <button type="button" onClick={() => editFileRef.current?.click()}
+                      className="inline-flex items-center gap-1.5 bg-secondary-container text-secondary text-xs font-inter font-semibold px-3 py-2 rounded-lg hover:bg-secondary hover:text-white transition-colors shrink-0">
+                      <Upload className="w-3.5 h-3.5" /> Enviar
+                    </button>
+                    <input ref={editFileRef} type="file" accept="image/*" onChange={pickEditFile} className="hidden" />
+                    <input value={editForm.capa_url}
+                      onChange={(e) => { setEditForm((s) => ({ ...s, capa_url: e.target.value })); setEditFile(null); setEditPreview(null) }}
+                      placeholder="ou cole uma URL da capa" className={`${inlineCls} flex-1`} />
+                  </div>
                 </div>
               ) : (
                 <div className="flex-1 flex items-center justify-between">

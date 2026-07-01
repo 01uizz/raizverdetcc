@@ -1,12 +1,11 @@
 'use client'
 import { useParams } from 'next/navigation'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useArea } from '@/hooks/useAreas'
 import { useUpdatesByArea } from '@/hooks/useUpdates'
 import { useReports } from '@/hooks/useReports'
 import { Timeline } from '@/components/timeline/Timeline'
-import { Badge, Card, ProgressBar, Spinner, EmptyState } from '@/components/ui'
+import { Badge, Card, ProgressBar, Spinner, EmptyState, CoverImage } from '@/components/ui'
 import { Target, TreePine, Leaf, FileText, Download, MapPin, ImageOff } from 'lucide-react'
 
 const statusColor: Record<string, string> = { ativo: 'green', em_andamento: 'green', concluido: 'gray', pausado: 'amber' }
@@ -49,14 +48,12 @@ export default function AreaDetailPage() {
 
       {/* Capa do projeto (placeholder elegante quando não há imagem) */}
       <div className="relative h-56 md:h-72 rounded-2xl overflow-hidden border border-outline-variant bg-canopy-radial">
-        {capa ? (
-          <Image src={capa} alt={area.nome} fill sizes="100vw" className="object-cover" />
-        ) : (
+        <CoverImage src={capa} alt={area.nome}>
           <div className="absolute inset-0 flex flex-col items-center justify-center text-white/70 gap-2">
             <ImageOff className="w-8 h-8" />
             <span className="text-xs font-inter">Imagem do projeto em breve</span>
           </div>
-        )}
+        </CoverImage>
         <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6">
           <Badge label={statusLabel[area.status] ?? area.status} color={statusColor[area.status] ?? 'gray'} />

@@ -1,5 +1,6 @@
 export { Card } from './Card'
 export { Button } from './Button'
+export { CoverImage } from './CoverImage'
 
 import { clsx } from 'clsx'
 import type { ElementType, ReactNode } from 'react'
